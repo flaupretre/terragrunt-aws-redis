@@ -4,7 +4,7 @@ module "redis" {
   availability_zones           = var.availability_zones
   namespace                    = var.namespace
   stage                        = lookup(var.short_env, var.env, "dev")
-  name                         = "${var.name}-${random_string.str.result}"
+  name                         = "${var.name}-redis-${random_string.str.result}"
   zone_id                      = var.zone_id
   vpc_id                       = var.vpc_id
   allowed_security_groups      = var.allowed_security_groups
