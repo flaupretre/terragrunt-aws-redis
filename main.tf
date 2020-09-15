@@ -3,8 +3,8 @@ module "redis" {
   notification_topic_arn       = var.sns_topic_arn
   availability_zones           = var.availability_zones
   namespace                    = var.namespace
-  stage                        = lookup(var.short_env, var.env, "dev")
-  name                         = "${var.name}-redis-${random_string.str.result}"
+  stage                        = ""
+  name                         = "${var.project}-${lookup(var.short_env, var.env, "dev")}-redis-${random_string.str.result}"
   zone_id                      = var.zone_id
   vpc_id                       = var.vpc_id
   allowed_security_groups      = var.allowed_security_groups
@@ -25,7 +25,7 @@ module "redis" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "eviction_alarm" {
-  alarm_name                = "${lookup(var.short_env, var.env, "dev")}-${var.name}-redis-${random_string.str.result}-001-alarm-eviction"
+  alarm_name                = "${var.project}-${lookup(var.short_env, var.env, "dev")}-redis-${random_string.str.result}-${random_string.str.result}-001-alarm-eviction"
   comparison_operator       = "GreaterThanThreshold"
   evaluation_periods        = "1"
   metric_name               = "Evictions"
@@ -38,10 +38,18 @@ resource "aws_cloudwatch_metric_alarm" "eviction_alarm" {
   dimensions                = {
     "CacheClusterId"        = "${module.redis.id}-001"
   }
+  actions_enabled           = true
+    alarm_actions             = [
+      var.sns_topic_arn
+    ]
+    ok_actions                = [
+      var.sns_topic_arn
+    ]
+  treat_missing_data        = "missing"
 }
 
 resource "aws_cloudwatch_metric_alarm" "currconnections_alarm" {
-  alarm_name                = "${lookup(var.short_env, var.env, "dev")}-${var.name}-redis-${random_string.str.result}-001-alarm-currconnection"
+  alarm_name                = "${var.project}-${lookup(var.short_env, var.env, "dev")}-redis-${random_string.str.result}-${random_string.str.result}-001-alarm-currconnection"
   comparison_operator       = "GreaterThanThreshold"
   evaluation_periods        = "1"
   metric_name               = "CurrConnections"
@@ -54,5 +62,12 @@ resource "aws_cloudwatch_metric_alarm" "currconnections_alarm" {
   dimensions                = {
     "CacheClusterId"        = "${module.redis.id}-001"
   }
+  actions_enabled           = true
+    alarm_actions             = [
+      var.sns_topic_arn
+    ]
+    ok_actions                = [
+      var.sns_topic_arn
+    ]
+  treat_missing_data        = "missing"
 }
-// add additionnal cloudwatch alert here
