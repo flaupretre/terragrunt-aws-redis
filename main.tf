@@ -1,5 +1,5 @@
 module "redis" {
-  source                       = "git::https://github.com/cloudposse/terraform-aws-elasticache-redis.git?ref=0.23.0"
+  source                       = "git::https://github.com/cloudposse/terraform-aws-elasticache-redis.git?ref=0.24.0"
   notification_topic_arn       = var.sns_topic_arn
   availability_zones           = var.availability_zones
   namespace                    = var.namespace
@@ -24,4 +24,35 @@ module "redis" {
   ok_actions                   = [ var.sns_topic_arn ]
 }
 
+resource "aws_cloudwatch_metric_alarm" "eviction_alarm" {
+  alarm_name                = "${lookup(var.short_env, var.env, "dev")}-${var.name}-redis-${random_string.str.result}-001-alarm-eviction"
+  comparison_operator       = "GreaterThanThreshold"
+  evaluation_periods        = "1"
+  metric_name               = "Evictions"
+  namespace                 = "AWS/ElastiCache"
+  period                    = "300"
+  statistic                 = "Average"
+  threshold                 = "10"
+  alarm_description         = "This metric monitors redis evictions"
+  tags                      = var.tags
+  dimensions                = {
+    "CacheClusterId"        = "${module.redis.id}-001"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "currconnections_alarm" {
+  alarm_name                = "${lookup(var.short_env, var.env, "dev")}-${var.name}-redis-${random_string.str.result}-001-alarm-currconnection"
+  comparison_operator       = "GreaterThanThreshold"
+  evaluation_periods        = "1"
+  metric_name               = "CurrConnections"
+  namespace                 = "AWS/ElastiCache"
+  period                    = "300"
+  statistic                 = "Average"
+  threshold                 = "50"
+  alarm_description         = "This metric monitors redis current connections"
+  tags                      = var.tags
+  dimensions                = {
+    "CacheClusterId"        = "${module.redis.id}-001"
+  }
+}
 // add additionnal cloudwatch alert here
