@@ -1,5 +1,5 @@
 module "redis" {
-  source                       = "git::https://github.com/cloudposse/terraform-aws-elasticache-redis.git?ref=0.24.0"
+  source                       = "git::https://github.com/cloudposse/terraform-aws-elasticache-redis.git?ref=0.37.0"
   notification_topic_arn       = var.sns_topic_arn
   availability_zones           = var.availability_zones
   namespace                    = var.namespace
